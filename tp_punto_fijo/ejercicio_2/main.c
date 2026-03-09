@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <math.h>
 float fx2fp(int32_t fixed_val, uint8_t fractional_bits){
@@ -11,8 +12,8 @@ int32_t fp2fx(float fp_val, uint8_t fractional_bits){
 }
 void main(void){
     float res_Q23_8 = fx2fp(fp2fx(2.4515,8),8);
-    float res_Q21_10 = fx2fp(fp2fx(2.4515,10),10);  
-    printf("Q23.8: %f", res_Q23_8);
-    printf("Q21.10: %f", res_Q21_10);
+    float res_Q21_10 = fx2fp(fp2fx(2.4515,16),16);  
+    printf("Q23.8: %f\n", res_Q23_8);
+    printf("Q21.10: %f\n", res_Q21_10);
     
 }
