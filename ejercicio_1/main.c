@@ -5,6 +5,7 @@
 void main(void)
 {
     signed char a, b, c, d, s1, s2;
+
     a = 127;
     b = 127;
     c = a + b;
