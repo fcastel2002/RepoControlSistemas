@@ -1,0 +1,42 @@
+.vscode
+# C / C++ 
+*.o
+*.obj
+*.out
+*.exe
+*.app
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+build/
+build-*/
+out/
+
+# MATLAB
+*.asv
+*.m~
+*.mat
+*.mex*
+slprj/
+sfprj/
+*.mltbx
+*.mlappinstall
+
+# Temporales y Sistema Operativo
+*~
+*.swp
+.DS_Store
+Thumbs.db
