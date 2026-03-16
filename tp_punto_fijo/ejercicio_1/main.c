@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 
-void main(void)
+int main(void)
 {
     signed char a, b, c, d, s1, s2;
 
@@ -18,4 +18,5 @@ void main(void)
     printf("s1 = %d \n", s1);
     printf("s2 = %d \n", s2);
     
+    return 0;
 }
