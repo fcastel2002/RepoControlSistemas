@@ -1,0 +1,137 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{arrows.meta,positioning}
+
+\geometry{margin=2.4cm}
+\setlist[itemize]{leftmargin=*, itemsep=0.15em}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\title{\textbf{Trabajo Final}\\
+\large Agitador magnético con control de agitación frente a variaciones de viscosidad}
+\author{Francisco Castel\\
+Facultad de Ingeniería -- Universidad Nacional de Cuyo\\
+Control y Sistemas}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{figure}[ht]
+    \centering
+    \IfFileExists{agitador.png}{%
+        \includegraphics[width=0.75\linewidth]{agitador.png}
+    }{%
+        \fbox{%
+            \begin{minipage}[c][3.2cm][c]{0.75\linewidth}
+                \centering
+                \textbf{Imagen del agitador magnético}\\[0.25cm]
+                Placeholder para incorporar \texttt{agitador.png}.
+            \end{minipage}
+        }
+    }
+    \caption{Agitador comercial Hei-Mix S. Fuente: \url{https://heidolph.com/asia/en/hei-mix-s~p345}}
+    \label{fig:agitador}
+\end{figure}
+
+\section{Propuesta y motivación}
+
+Se propone desarrollar un agitador magnético de laboratorio accionado por un motor BLDC/PMSM. El motor hará girar un imán permanente ubicado debajo del recipiente y, mediante acoplamiento magnético, transmitirá movimiento a una barra agitadora inmersa en el fluido.
+
+La aplicación resulta de interés porque la carga mecánica del sistema no es fija: depende de la viscosidad del fluido, el volumen, la geometría del recipiente, el tamaño de la barra y la calidad del acoplamiento magnético. En esas condiciones, un ajuste manual de potencia puede ser insuficiente si se busca repetibilidad entre ensayos o una condición de mezcla estable.
+
+Desde el punto de vista práctico, la agitación magnética permite mezclar fluidos sin introducir un eje mecánico en el recipiente, lo que simplifica el uso con muestras y recipientes intercambiables. Desde el punto de vista académico, el sistema combina accionamiento eléctrico, sensado, carga variable y control discreto en una aplicación concreta, acotada y vinculada con la maqueta previa de motores BLDC/PMSM.
+
+\section{Objetivo}
+
+Diseñar y validar un sistema de control para un agitador magnético capaz de mantener una condición de agitación estable frente a variaciones de carga asociadas principalmente a cambios de viscosidad del fluido.
+
+Los objetivos específicos son:
+
+\begin{itemize}
+    \item Definir la arquitectura general del agitador: motor, accionamiento, imán impulsor, barra agitadora, recipiente y fluido.
+    \item Analizar la reutilización de la maqueta previa del ESC para motores BLDC/PMSM.
+    \item Plantear una representación de alto nivel que relacione accionamiento, agitación y carga viscosa.
+    \item Proponer una estrategia de control de velocidad o intensidad de agitación.
+    \item Validar por simulación el comportamiento ante cambios de consigna, variaciones de carga y perturbaciones representativas.
+\end{itemize}
+
+\section{Sistema propuesto}
+
+La planta puede entenderse como una cadena de conversión entre la acción eléctrica aplicada al motor y el movimiento final del fluido:
+
+\begin{center}
+    accionamiento eléctrico $\rightarrow$ motor $\rightarrow$ imán impulsor $\rightarrow$ barra agitadora $\rightarrow$ fluido.
+\end{center}
+
+La variable controlada inicial será la velocidad del motor o una magnitud equivalente asociada a la intensidad de agitación. La perturbación principal será la variación de carga producida por cambios de viscosidad. También se considerarán efectos como pérdida parcial de acoplamiento, descentrado de la barra, variaciones de volumen y limitaciones propias de la etapa de potencia.
+
+\begin{figure}[ht]
+    \centering
+    \resizebox{0.94\textwidth}{!}{%
+    \begin{tikzpicture}[
+        block/.style={draw, rectangle, minimum height=0.95cm, minimum width=2.45cm, align=center},
+        sum/.style={draw, circle, minimum size=0.65cm},
+        arrow/.style={-{Latex[length=2mm]}, thick},
+        node distance=0.9cm and 1cm
+    ]
+        \node (ref) {Consigna};
+        \node[sum, right=of ref] (sum) {$+$};
+        \node[block, right=of sum] (ctrl) {Control\\discreto};
+        \node[block, right=of ctrl] (driver) {Etapa de\\potencia};
+        \node[block, right=of driver] (plant) {Motor + imán\\+ fluido};
+        \node[block, below=of plant] (sensor) {Sensado o\\estimación};
+        \node[right=of plant] (out) {Agitación};
+        \node[above=0.55cm of plant] (dist) {Carga variable};
+
+        \draw[arrow] (ref) -- (sum);
+        \draw[arrow] (sum) -- (ctrl);
+        \draw[arrow] (ctrl) -- (driver);
+        \draw[arrow] (driver) -- (plant);
+        \draw[arrow] (plant) -- (out);
+        \draw[arrow] (dist) -- (plant);
+        \draw[arrow] (plant) -- (sensor);
+        \draw[arrow] (sensor.west) -| node[pos=0.95, below] {$-$} (sum.south);
+    \end{tikzpicture}
+    }
+    \caption{Diagrama conceptual del sistema de control.}
+\end{figure}
+
+\section{Control, sensado y validación}
+
+La estrategia de control se definirá a partir de una referencia indicada por el usuario, una medición o estimación de la salida y una acción sobre el motor. La maqueta previa servirá como punto de partida para reutilizar, si resulta conveniente, la etapa de potencia, la generación de PWM, las rutinas de arranque y la medición o estimación de velocidad del motor.
+
+La elección de sensores quedará asociada a la información necesaria para cerrar el lazo. En principio se evaluará si alcanza con estimar la velocidad del motor o si conviene incorporar medición de corriente, sensores externos o alguna forma de detección de desacople entre el imán impulsor y la barra agitadora.
+
+La validación se realizará mediante simulaciones y, si la maqueta lo permite, ensayos de alcance limitado. Se considerarán cambios de consigna, variaciones equivalentes de viscosidad, pérdida parcial de acoplamiento, ruido de medición y saturación del accionamiento. Los criterios principales serán estabilidad, capacidad de sostener la agitación, esfuerzo de control y factibilidad de implementación.
+
+\section{Puntos pendientes}
+
+Durante el desarrollo deberán resolverse las siguientes decisiones:
+
+\begin{itemize}
+    \item Determinar si alcanza con controlar la velocidad del motor o si debe medirse alguna variable más cercana a la agitación real.
+    \item Definir si será necesario sensar corrientes de fase o de bus para estimar carga, detectar desacople o proteger la etapa de potencia.
+    \item Evaluar si la conmutación actual es suficiente o si conviene migrar hacia un método basado en corrientes.
+    \item Establecer el rango de viscosidades, volúmenes y velocidades que se tomará como caso de estudio.
+    \item Definir qué parte se validará por simulación y qué parte podrá verificarse experimentalmente.
+\end{itemize}
+
+\section{Resultado esperado}
+
+Se espera obtener una propuesta técnicamente justificada de agitador magnético controlado, apoyada en la maqueta existente y validada mediante simulaciones o ensayos acotados. El resultado deberá mostrar que la aplicación es viable y que el control propuesto mejora la capacidad de mantener una condición de agitación frente a cambios razonables de carga.
+
+\end{document}

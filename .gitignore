@@ -40,3 +40,5 @@ sfprj/
 *.swp
 .DS_Store
 Thumbs.db
+/libros
+*.pdf
